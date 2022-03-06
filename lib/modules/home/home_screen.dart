@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final specialRandom = await SpecialRandomService().generate();
       final article = await ArticleService().fetch(specialRandom.pageName);
 
-      print(article.toJson());
+      print(article.getSentence());
     } catch (e) {
       print(e);
     }

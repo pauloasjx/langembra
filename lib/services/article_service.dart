@@ -8,6 +8,6 @@ class ArticleService {
 
     final response = await Dio().get(url);
 
-    return Article.fromJson(response.data);
+    return Article.fromJson(response.data)..url = url;
   }
 }
