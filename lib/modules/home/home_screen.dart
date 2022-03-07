@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:langembra/services/article_service.dart';
 import 'package:langembra/services/special_random_service.dart';
@@ -25,28 +27,81 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final String sample = "You can get some cash from the ATM";
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              'nothing',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        child: Container(
+          margin: EdgeInsets.all(16.0),
+          child: SentenceWidget(sample),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: fetch,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+    );
+  }
+}
+
+class SentenceWidget extends StatelessWidget {
+  String? text;
+  List<Widget>? subsentences;
+
+  SentenceWidget(String text) {
+    final List<Widget> subsentences =
+        text.split(" ").map((s) => WordWidget(s)).toList();
+    final rnd = Random();
+    final idx = rnd.nextInt(subsentences.length);
+    // final subsentence = subsentences[idx] as WordWidget;
+    // if (subsentence.runtimeType == WordWidget) {
+    // subsentences[idx] = subsentence.toInput();
+    // }
+
+    this.text = text;
+    this.subsentences = subsentences;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+        children: subsentences!,
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center);
+  }
+}
+
+class WordWidget extends StatelessWidget {
+  final String value;
+
+  WordWidget(this.value);
+
+  @override
+  build(BuildContext context) {
+    return Text(" " + value);
+  }
+
+  WordInputWidget toInput() => WordInputWidget(this.value);
+}
+
+class WordInputWidget extends StatefulWidget {
+  final String value;
+
+  WordInputWidget(this.value);
+
+  @override
+  _WordInputWidgetState createState() => _WordInputWidgetState();
+}
+
+class _WordInputWidgetState extends State<WordInputWidget> {
+  String current = "";
+
+  @override
+  build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.0),
+      child: SizedBox(
+        child: TextField(),
+        width: 100,
       ),
     );
   }
