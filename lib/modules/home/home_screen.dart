@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:langembra/services/article_service.dart';
 import 'package:langembra/services/special_random_service.dart';
@@ -28,15 +26,26 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final String sample = "You can get some cash from the ATM";
+    final String sample2 = "Você pode obter algum dinheiro no caixa eletrônico";
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title, style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
       ),
       body: Center(
-        child: Container(
-          margin: EdgeInsets.all(16.0),
-          child: SentenceWidget(sample),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              margin: EdgeInsets.all(16.0),
+              child: Text(sample2, style: TextStyle(fontSize: 18)),
+            ),
+            Container(
+              margin: EdgeInsets.all(16.0),
+              child: SentenceWidget(sample),
+            )
+          ],
         ),
       ),
     );
@@ -44,19 +53,17 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class SentenceWidget extends StatelessWidget {
-  String? text;
-  List<Widget>? subsentences;
+  late String text;
+  late List<Widget> subsentences;
 
   SentenceWidget(String text) {
-    final List<Widget> subsentences =
-        text.split(" ").map((s) => WordWidget(s)).toList();
-    final rnd = Random();
-    final idx = rnd.nextInt(subsentences.length);
-    // final subsentence = subsentences[idx] as WordWidget;
-    // if (subsentence.runtimeType == WordWidget) {
-    // subsentences[idx] = subsentence.toInput();
-    // }
-
+    final List<Widget> subsentences = text
+        .split(" ")
+        .asMap()
+        .map((idx, s) =>
+            MapEntry(idx, idx == 2 ? WordInputWidget(s) : WordWidget(s)))
+        .values
+        .toList();
     this.text = text;
     this.subsentences = subsentences;
   }
@@ -64,7 +71,7 @@ class SentenceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-        children: subsentences!,
+        children: subsentences,
         alignment: WrapAlignment.center,
         crossAxisAlignment: WrapCrossAlignment.center);
   }
@@ -77,7 +84,7 @@ class WordWidget extends StatelessWidget {
 
   @override
   build(BuildContext context) {
-    return Text(" " + value);
+    return Text(" " + value, style: TextStyle(fontSize: 20.0));
   }
 
   WordInputWidget toInput() => WordInputWidget(this.value);
@@ -93,14 +100,51 @@ class WordInputWidget extends StatefulWidget {
 }
 
 class _WordInputWidgetState extends State<WordInputWidget> {
-  String current = "";
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  bool isRight() => _controller.value.text == widget.value;
 
   @override
   build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.0),
+      margin: EdgeInsets.symmetric(horizontal: 8.0),
       child: SizedBox(
-        child: TextField(),
+        child: TextField(
+            controller: _controller,
+            onSubmitted: (String value) async {
+              await showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("Result"),
+                      content: Text(isRight() ? "Ok" : "Not ok"),
+                      actions: <Widget>[
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("Ok"))
+                      ],
+                    );
+                  });
+            },
+            decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.all(0.0)),
+            style: TextStyle(fontSize: 20.0),
+            textAlign: TextAlign.center),
         width: 100,
       ),
     );
