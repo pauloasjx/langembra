@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:langembra/services/article_service.dart';
-import 'package:langembra/services/special_random_service.dart';
 import 'package:langembra/widgets/sentence_widget.dart';
+
+enum AnswerState { nothing, correct, wrong }
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key, required this.title}) : super(key: key);
@@ -13,58 +13,67 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  void fetch() async {
-    try {
-      final specialRandom = await SpecialRandomService().generate();
-      final article = await ArticleService().fetch(specialRandom.pageName);
+  late List<String> samples;
+  int current = 0;
+  AnswerState answerState = AnswerState.nothing;
 
-      print(article.getSentence());
-    } catch (e) {
-      print(e);
-    }
+  @override
+  void initState() {
+    super.initState();
+    this.samples = [
+      "You can get some cash from the ATM",
+      "Civilian casualties reach 1,335 since Russia’s full-scale invasion began",
+      "474 civilians have been killed and 861 injured"
+    ];
+    this.current = 0;
   }
 
   @override
   Widget build(BuildContext context) {
-    final String sample = "You can get some cash from the ATM";
-    final String sample2 = "Você pode obter algum dinheiro no caixa eletrônico";
-
-    final SentenceWidget sentence = SentenceWidget(sample);
+    final SentenceWidget sentence =
+        SentenceWidget(samples.elementAt(this.current));
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
-            await showDialog<void>(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text("Result"),
-                    content: Text(sentence.isRight() ? "Ok" : "Not ok"),
-                    actions: <Widget>[
-                      TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text("Ok"))
-                    ],
-                  );
-                });
+            final bool correct = sentence.isRight();
+            final SnackBar snackBar = SnackBar(
+                content: Text(correct ? "Correto" : "Errado",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                duration: Duration(seconds: 1),
+                backgroundColor: correct ? Colors.green : Colors.red);
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            if (this.current < this.samples.length - 1) {
+              setState(() {
+                current += 1;
+              });
+            }
           },
-          backgroundColor: Colors.white,
-          label: Text("Confirmar", style: TextStyle(color: Colors.black)),
-          icon: Icon(Icons.navigate_next, color: Colors.black)),
+          label: Text("Confirmar"),
+          icon: Icon(Icons.navigate_next)),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              margin: EdgeInsets.all(16.0),
-              child: Text(sample2, style: TextStyle(fontSize: 18)),
+                child: Row(children: [Text("Langembra")]),
+                margin: EdgeInsets.all(16.0)),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: EdgeInsets.all(16.0),
+                    child: Text(
+                        "Você pode obter algum dinheiro no caixa eletrônico",
+                        style: TextStyle(fontSize: 18)),
+                  ),
+                  Container(
+                    margin: EdgeInsets.all(16.0),
+                    child: sentence,
+                  )
+                ],
+              ),
             ),
-            Container(
-              margin: EdgeInsets.all(16.0),
-              child: sentence,
-            )
           ],
         ),
       ),

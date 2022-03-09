@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'modules/home/home_screen.dart';
+import 'package:langembra/modules/home/home_screen.dart';
 
 void main() {
   runApp(App());

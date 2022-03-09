@@ -9,7 +9,7 @@ class SentenceWidget extends StatelessWidget {
         .split(" ")
         .asMap()
         .map((idx, s) =>
-            MapEntry(idx, idx % 2 == 0 ? WordInputWidget(s) : WordWidget(s)))
+            MapEntry(idx, idx == 2 ? WordInputWidget(s) : WordWidget(s)))
         .values
         .toList();
     this.text = text;
