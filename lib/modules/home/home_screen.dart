@@ -3,6 +3,30 @@ import 'package:langembra/widgets/sentence_widget.dart';
 
 enum AnswerState { nothing, correct, wrong }
 
+extension AnswerStateExtension on AnswerState {
+  String get title {
+    switch (this) {
+      case AnswerState.correct:
+        return "Correto";
+      case AnswerState.wrong:
+        return "Errado";
+      default:
+        return "";
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case AnswerState.correct:
+        return Colors.green;
+      case AnswerState.wrong:
+        return Colors.red;
+      default:
+        return Colors.black;
+    }
+  }
+}
+
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key, required this.title}) : super(key: key);
 
@@ -36,18 +60,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
-            final bool correct = sentence.isRight();
+            setState(() {
+              answerState =
+                  sentence.isRight() ? AnswerState.correct : AnswerState.wrong;
+            });
             final SnackBar snackBar = SnackBar(
-                content: Text(correct ? "Correto" : "Errado",
+                content: Text(answerState.title,
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 duration: Duration(seconds: 1),
-                backgroundColor: correct ? Colors.green : Colors.red);
+                backgroundColor: answerState.color);
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            if (this.current < this.samples.length - 1) {
-              setState(() {
-                current += 1;
-              });
-            }
           },
           label: Text("Confirmar"),
           icon: Icon(Icons.navigate_next)),
@@ -70,6 +92,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     margin: EdgeInsets.all(16.0),
                     child: sentence,
+                  ),
+                  Container(
+                    margin: EdgeInsets.all(16.0),
+                    child: Text(sentence.text, style: TextStyle(fontSize: 18)),
                   )
                 ],
               ),
